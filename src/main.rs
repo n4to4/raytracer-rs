@@ -1,4 +1,4 @@
-use raytracer::*;
+use raytracer::vec3::*;
 use std::io::Write;
 
 const IMAGE_WIDTH: usize = 256;
