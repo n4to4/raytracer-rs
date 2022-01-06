@@ -1,3 +1,5 @@
+#![allow(clippy::new_without_default)]
+
 pub mod hittable;
 pub mod hittable_list;
 pub mod ray;
