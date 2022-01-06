@@ -14,8 +14,8 @@ const FOCAL_LENGTH: f64 = 1.0;
 
 fn hit_sphere(center: &Vec3, radius: f64, r: &Ray) -> f64 {
     let oc = r.origin - *center;
-    let a = Vec3::dot(&r.direction, &r.direction);
-    let half_b = Vec3::dot(&oc, &r.direction);
+    let a = Vec3::dot(r.direction, r.direction);
+    let half_b = Vec3::dot(oc, r.direction);
     let c = oc.length_squared() - radius * radius;
     let discriminant = half_b * half_b - a * c;
 

@@ -20,11 +20,11 @@ impl Vec3 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 
-    pub fn dot(u: &Self, v: &Self) -> f64 {
+    pub fn dot(u: Self, v: Self) -> f64 {
         u.x * v.x + u.y * v.y + u.z * v.z
     }
 
-    pub fn cross(u: &Self, v: &Self) -> Self {
+    pub fn cross(u: Self, v: Self) -> Self {
         Vec3::new(
             u.y * v.z - u.z * v.y,
             u.z * v.x - u.x * v.z,
