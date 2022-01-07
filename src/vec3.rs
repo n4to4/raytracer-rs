@@ -38,6 +38,10 @@ impl Vec3 {
         )
     }
 
+    pub fn reflect(&self, n: Self) -> Self {
+        *self - 2.0 * Self::dot(*self, n) * n
+    }
+
     pub fn unit_vector(v: Self) -> Self {
         let len = v.length();
         v / len

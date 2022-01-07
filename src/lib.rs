@@ -6,6 +6,7 @@ pub mod hittable;
 pub mod hittable_list;
 pub mod lambertian;
 pub mod material;
+pub mod metal;
 pub mod ray;
 pub mod sphere;
 pub mod vec3;

@@ -14,11 +14,13 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
         return Vec3::new(0.0, 0.0, 0.0);
     }
 
-    let mut rec = HitRecord::default();
-    if world.hit(r, 0.001, f64::INFINITY, &mut rec) {
-        let target = rec.p + rec.normal + Vec3::random_unit_vector();
-        let new_ray = Ray::new(rec.p, target - rec.p);
-        return 0.5 * ray_color(&new_ray, world, depth - 1);
+    if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
+        let rec2 = rec.clone();
+        if let Some((attenuation, scattered)) = rec.mat_ptr.unwrap().scatter(r, &rec2) {
+            return attenuation * ray_color(&scattered, world, depth - 1);
+        } else {
+            return Vec3::new(0.0, 0.0, 0.0);
+        }
     }
 
     let unit_direction = Vec3::unit_vector(r.direction);
@@ -29,8 +31,12 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // World
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, None)));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        None,
+    )));
 
     // Camera
     let camera = Camera::new();
