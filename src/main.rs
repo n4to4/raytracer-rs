@@ -16,8 +16,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
     }
 
     if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
-        let rec2 = rec.clone();
-        if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec2) {
+        if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec) {
             return attenuation * ray_color(&scattered, world, depth - 1);
         } else {
             return Vec3::new(0.0, 0.0, 0.0);
