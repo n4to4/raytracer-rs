@@ -1,3 +1,4 @@
+use super::*;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy)]
@@ -35,6 +36,28 @@ impl Vec3 {
     pub fn unit_vector(v: Self) -> Self {
         let len = v.length();
         v / len
+    }
+
+    pub fn random() -> Self {
+        Vec3::new(random_f64(), random_f64(), random_f64())
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Self {
+        Vec3::new(
+            random_range_f64(min, max),
+            random_range_f64(min, max),
+            random_range_f64(min, max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Vec3::random_range(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
     }
 }
 
