@@ -93,19 +93,3 @@ impl Neg for Vec3 {
         Vec3::new(-self.x, -self.y, -self.z)
     }
 }
-
-// color
-
-type Color = Vec3;
-
-impl std::fmt::Display for Color {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {} {}",
-            255.999 * self.x,
-            255.999 * self.y,
-            255.999 * self.z
-        )
-    }
-}
