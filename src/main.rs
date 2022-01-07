@@ -30,25 +30,30 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // World
+    #[allow(non_snake_case)]
+    let R = (std::f64::consts::PI / 4.0).cos();
     let mut world = HittableList::new();
-
-    let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Dielectric { ir: 1.5 });
-    let material_right = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
 
     let mut world_add = |p: (f64, f64, f64), r: f64, m: Rc<dyn Material>| {
         world.add(Box::new(Sphere::new(Vec3::new(p.0, p.1, p.2), r, m)));
     };
 
-    world_add((0.0, -100.5, -1.0), 100.0, material_ground);
-    world_add((0.0, 0.0, -1.0), 0.5, material_center);
-    world_add((-1.0, 0.0, -1.0), 0.5, material_left.clone());
-    world_add((-1.0, 0.0, -1.0), -0.4, material_left);
-    world_add((1.0, 0.0, -1.0), 0.5, material_right);
+    //let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
+    //let material_center = Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5)));
+    let material_left = Rc::new(Lambertian::new(Vec3::new(0.0, 0.0, 1.0)));
+    let material_right = Rc::new(Lambertian::new(Vec3::new(1.0, 0.0, 0.0)));
+
+    world_add((-R, 0.0, -1.0), R, material_left);
+    world_add((R, 0.0, -1.0), R, material_right);
+
+    //world_add((0.0, -100.5, -1.0), 100.0, material_ground);
+    //world_add((0.0, 0.0, -1.0), 0.5, material_center);
+    //world_add((-1.0, 0.0, -1.0), 0.5, material_left.clone());
+    //world_add((-1.0, 0.0, -1.0), -0.4, material_left);
+    //world_add((1.0, 0.0, -1.0), 0.5, material_right);
 
     // Camera
-    let camera = Camera::new();
+    let camera = Camera::new(90.0, ASPECT_RATIO);
 
     // Stdout/err
     let stderr = std::io::stderr();
