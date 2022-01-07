@@ -16,7 +16,7 @@ pub use color::Color;
 pub use hittable::{HitRecord, Hittable};
 pub use hittable_list::HittableList;
 pub use lambertian::Lambertian;
-pub use material::Material;
+pub use material::{Dielectric, Material};
 pub use metal::Metal;
 pub use ray::Ray;
 pub use sphere::Sphere;
