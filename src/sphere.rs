@@ -4,11 +4,11 @@ use std::rc::Rc;
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
-    pub mat_ptr: Option<Rc<dyn Material>>,
+    pub mat_ptr: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, mat_ptr: Option<Rc<dyn Material>>) -> Self {
+    pub fn new(center: Vec3, radius: f64, mat_ptr: Rc<dyn Material>) -> Self {
         Sphere {
             center,
             radius,
@@ -39,13 +39,14 @@ impl Hittable for Sphere {
             }
         }
 
-        let mut hit = HitRecord::default();
-        hit.t = root;
-        hit.p = r.at(hit.t);
-        let outward_normal = (hit.p - self.center) / self.radius;
-        hit.set_face_normal(r, outward_normal);
-        hit.mat_ptr = self.mat_ptr.as_ref().cloned();
-
-        Some(hit)
+        let hit_p = r.at(root);
+        let outward_normal = (hit_p - self.center) / self.radius;
+        Some(HitRecord::new_with(
+            r,
+            hit_p,
+            root,
+            outward_normal,
+            self.mat_ptr.clone(),
+        ))
     }
 }
