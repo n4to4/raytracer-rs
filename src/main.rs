@@ -1,5 +1,6 @@
 use raytracer::*;
 use std::io::Write;
+use std::rc::Rc;
 
 // Image
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -31,11 +32,31 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // World
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, None)));
+
+    let material_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
+    let material_center = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
+    let material_left = Metal::new(Vec3::new(0.8, 0.8, 0.8));
+    let material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2));
+
     world.add(Box::new(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
         100.0,
-        None,
+        Some(Rc::new(material_ground)),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        Some(Rc::new(material_center)),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        0.5,
+        Some(Rc::new(material_left)),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(1.0, 0.0, -1.0),
+        0.5,
+        Some(Rc::new(material_right)),
     )));
 
     // Camera
