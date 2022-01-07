@@ -1,13 +1,19 @@
 use super::*;
+use std::rc::Rc;
 
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
+    pub mat_ptr: Option<Rc<dyn Material>>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self {
-        Sphere { center, radius }
+    pub fn new(center: Vec3, radius: f64, mat_ptr: Option<Rc<dyn Material>>) -> Self {
+        Sphere {
+            center,
+            radius,
+            mat_ptr,
+        }
     }
 }
 
@@ -37,6 +43,7 @@ impl Hittable for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
+        rec.mat_ptr = self.mat_ptr.as_ref().cloned();
 
         true
     }

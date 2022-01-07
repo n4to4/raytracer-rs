@@ -1,13 +1,14 @@
 use super::*;
+use std::rc::Rc;
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
 }
 
-#[derive(Debug)]
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
+    pub mat_ptr: Option<Rc<dyn Material>>,
     pub t: f64,
     pub front_face: bool,
 }
@@ -17,6 +18,7 @@ impl Default for HitRecord {
         HitRecord {
             p: Vec3::new(0.0, 0.0, 0.0),
             normal: Vec3::new(0.0, 0.0, 0.0),
+            mat_ptr: None,
             t: 0.0,
             front_face: false,
         }
