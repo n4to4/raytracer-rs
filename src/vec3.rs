@@ -21,6 +21,11 @@ impl Vec3 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+
     pub fn dot(u: Self, v: Self) -> f64 {
         u.x * v.x + u.y * v.y + u.z * v.z
     }
