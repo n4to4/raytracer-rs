@@ -4,11 +4,11 @@ use std::sync::Arc;
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
-    pub mat_ptr: Arc<dyn Material>,
+    pub mat_ptr: Arc<dyn Material + Send + Sync>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, mat_ptr: Arc<dyn Material>) -> Self {
+    pub fn new(center: Vec3, radius: f64, mat_ptr: Arc<dyn Material + Send + Sync>) -> Self {
         Sphere {
             center,
             radius,
@@ -46,7 +46,7 @@ impl Hittable for Sphere {
             hit_p,
             root,
             outward_normal,
-            self.mat_ptr.clone(),
+            Arc::clone(&self.mat_ptr),
         ))
     }
 }

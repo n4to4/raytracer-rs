@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use raytracer::*;
 use std::io::Write;
 use std::sync::Arc;
@@ -30,15 +31,16 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let mut world_add = |p: (f64, f64, f64), r: f64, m: Arc<dyn Material>| {
-        world.add(Box::new(Sphere::new(Vec3::new(p.0, p.1, p.2), r, m)));
-    };
+    let mut world_add =
+        |p: (f64, f64, f64), r: f64, m: Arc<dyn Material + Send + Sync + 'static>| {
+            world.add(Arc::new(Sphere::new(Vec3::new(p.0, p.1, p.2), r, m)));
+        };
 
     let ground_material = Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world_add((0.0, -1000.0, 0.0), 1000.0, ground_material);
 
-    for a in [-10, 0, 10] {
-        for b in [-10, 0, 10] {
+    for a in -11..=11 {
+        for b in -11..=11 {
             let choose_mat = random_f64();
             let center = Vec3::new(
                 a as f64 + 0.9 * random_f64(),
@@ -105,20 +107,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     writeln!(stdout, "{} {}", IMAGE_WIDTH, IMAGE_HEIGHT)?;
     writeln!(stdout, "{}", 255)?;
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        write!(stderr, "\rScanlines remaining: {}", j)?;
-        stderr.flush()?;
-        for i in 0..IMAGE_WIDTH {
-            let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (i as f64 + random_f64()) / (IMAGE_WIDTH - 1) as f64;
-                let v = (j as f64 + random_f64()) / (IMAGE_HEIGHT - 1) as f64;
-                let r = camera.ray(u, v);
-                pixel_color = pixel_color + ray_color(&r, &world, MAX_DEPTH);
-            }
-            writeln!(stdout, "{}", pixel_color.to_color(SAMPLES_PER_PIXEL))?;
-        }
+    struct Line {
+        key: (usize, usize),
+        color: Color,
     }
+
+    let mut lines: Vec<Line> = (0..IMAGE_HEIGHT)
+        .rev()
+        .flat_map(|j| {
+            write!(stderr, "\rScanlines remaining: {}", j).unwrap();
+            (0..IMAGE_WIDTH)
+                .into_par_iter()
+                .map(|i| {
+                    let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+                    for _ in 0..SAMPLES_PER_PIXEL {
+                        let u = (i as f64 + random_f64()) / (IMAGE_WIDTH - 1) as f64;
+                        let v = (j as f64 + random_f64()) / (IMAGE_HEIGHT - 1) as f64;
+                        let r = camera.ray(u, v);
+                        pixel_color = pixel_color + ray_color(&r, &world, MAX_DEPTH);
+                    }
+                    let color = pixel_color.to_color(SAMPLES_PER_PIXEL);
+                    Line {
+                        key: (IMAGE_HEIGHT - j + 1, i),
+                        color,
+                    }
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+
+    lines.par_sort_by(|a, b| a.key.cmp(&b.key));
+    for line in &lines {
+        writeln!(stdout, "{}", line.color)?;
+    }
+
     write!(stderr, "\nDone.\n")?;
     Ok(())
 }
