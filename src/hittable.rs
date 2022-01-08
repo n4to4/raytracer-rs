@@ -1,5 +1,5 @@
 use super::*;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
@@ -9,7 +9,7 @@ pub trait Hittable {
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
-    pub mat_ptr: Rc<dyn Material>,
+    pub mat_ptr: Arc<dyn Material>,
     pub t: f64,
     pub front_face: bool,
 }
@@ -20,7 +20,7 @@ impl HitRecord {
         p: Vec3,
         t: f64,
         outward_normal: Vec3,
-        mat_ptr: Rc<dyn Material>,
+        mat_ptr: Arc<dyn Material>,
     ) -> Self {
         let (front_face, normal) = Self::face_normal(r, outward_normal);
         HitRecord {

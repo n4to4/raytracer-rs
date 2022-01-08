@@ -1,6 +1,6 @@
 use raytracer::*;
 use std::io::Write;
-use std::rc::Rc;
+use std::sync::Arc;
 
 // Image
 const ASPECT_RATIO: f64 = 3.0 / 2.0;
@@ -30,11 +30,11 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
-    let mut world_add = |p: (f64, f64, f64), r: f64, m: Rc<dyn Material>| {
+    let mut world_add = |p: (f64, f64, f64), r: f64, m: Arc<dyn Material>| {
         world.add(Box::new(Sphere::new(Vec3::new(p.0, p.1, p.2), r, m)));
     };
 
-    let ground_material = Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    let ground_material = Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world_add((0.0, -1000.0, 0.0), 1000.0, ground_material);
 
     for a in [-10, 0, 10] {
@@ -50,30 +50,30 @@ fn random_scene() -> HittableList {
                 if choose_mat < 0.8 {
                     // diffuse
                     let albedo = Vec3::random() * Vec3::random();
-                    let sphere_material = Rc::new(Lambertian::new(albedo));
+                    let sphere_material = Arc::new(Lambertian::new(albedo));
                     world_add((center.x, center.y, center.z), 0.2, sphere_material);
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = Vec3::random_range(0.5, 1.0);
                     let fuzz = random_range_f64(0.0, 0.5);
-                    let sphere_material = Rc::new(Metal::new(albedo, fuzz));
+                    let sphere_material = Arc::new(Metal::new(albedo, fuzz));
                     world_add((center.x, center.y, center.z), 0.2, sphere_material);
                 } else {
                     // glass
-                    let sphere_material = Rc::new(Dielectric { ir: 1.5 });
+                    let sphere_material = Arc::new(Dielectric { ir: 1.5 });
                     world_add((center.x, center.y, center.z), 0.2, sphere_material);
                 }
             }
         }
     }
 
-    let material1 = Rc::new(Dielectric { ir: 1.5 });
+    let material1 = Arc::new(Dielectric { ir: 1.5 });
     world_add((0.0, 1.0, 0.0), 1.0, material1);
 
-    let material2 = Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
+    let material2 = Arc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
     world_add((-4.0, 1.0, 0.0), 1.0, material2);
 
-    let material3 = Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
+    let material3 = Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
     world_add((4.0, 1.0, 0.0), 1.0, material3);
 
     world
