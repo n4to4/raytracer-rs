@@ -1,3 +1,5 @@
-Ray Tracing in One Weekend
+## [Ray Tracing in One Weekend][rtiow]
 
-https://raytracing.github.io/books/RayTracingInOneWeekend.html
+![image](image.png)
+
+[rtiow]: https://raytracing.github.io/books/RayTracingInOneWeekend.html
