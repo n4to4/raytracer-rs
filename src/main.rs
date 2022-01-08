@@ -3,10 +3,10 @@ use std::io::Write;
 use std::rc::Rc;
 
 // Image
-const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 400;
+const ASPECT_RATIO: f64 = 3.0 / 2.0;
+const IMAGE_WIDTH: usize = 1200;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-const SAMPLES_PER_PIXEL: i32 = 100;
+const SAMPLES_PER_PIXEL: i32 = 500;
 const MAX_DEPTH: i32 = 50;
 
 fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
@@ -28,36 +28,70 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // World
+fn random_scene() -> HittableList {
     let mut world = HittableList::new();
     let mut world_add = |p: (f64, f64, f64), r: f64, m: Rc<dyn Material>| {
         world.add(Box::new(Sphere::new(Vec3::new(p.0, p.1, p.2), r, m)));
     };
 
-    let material_ground = Rc::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Dielectric { ir: 1.5 });
-    let material_right = Rc::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0));
+    let ground_material = Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    world_add((0.0, -1000.0, 0.0), 1000.0, ground_material);
 
-    world_add((0.0, -100.5, -1.0), 100.0, material_ground);
-    world_add((0.0, 0.0, -1.0), 0.5, material_center);
-    world_add((-1.0, 0.0, -1.0), 0.5, material_left.clone());
-    world_add((-1.0, 0.0, -1.0), -0.4, material_left);
-    world_add((1.0, 0.0, -1.0), 0.5, material_right);
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random_f64();
+            let center = Vec3::new(
+                a as f64 + 0.9 * random_f64(),
+                0.2,
+                b as f64 + 0.9 * random_f64(),
+            );
+
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    // diffuse
+                    let albedo = Vec3::random() * Vec3::random();
+                    let sphere_material = Rc::new(Lambertian::new(albedo));
+                    world_add((center.x, center.y, center.z), 0.2, sphere_material);
+                } else if choose_mat < 0.95 {
+                    // metal
+                    let albedo = Vec3::random_range(0.5, 1.0);
+                    let fuzz = random_range_f64(0.0, 0.5);
+                    let sphere_material = Rc::new(Metal::new(albedo, fuzz));
+                    world_add((center.x, center.y, center.z), 0.2, sphere_material);
+                } else {
+                    // glass
+                    let sphere_material = Rc::new(Dielectric { ir: 1.5 });
+                    world_add((center.x, center.y, center.z), 0.2, sphere_material);
+                }
+            }
+        }
+    }
+
+    let material1 = Rc::new(Dielectric { ir: 1.5 });
+    world_add((0.0, 1.0, 0.0), 1.0, material1);
+
+    let material2 = Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
+    world_add((-4.0, 1.0, 0.0), 1.0, material2);
+
+    let material3 = Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
+    world_add((4.0, 1.0, 0.0), 1.0, material3);
+
+    world
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // World
+    let world = random_scene();
 
     // Camera
-    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
-    let dist_to_focus = (lookfrom - lookat).length();
     let camera = Camera::new(
-        lookfrom,
-        lookat,
+        Vec3::new(13.0, 2.0, 3.0),
+        Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
         20.0,
         ASPECT_RATIO,
-        2.0,
-        dist_to_focus,
+        0.1,
+        10.0,
     );
 
     // Stdout/err
