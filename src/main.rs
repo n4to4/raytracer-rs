@@ -37,8 +37,8 @@ fn random_scene() -> HittableList {
     let ground_material = Rc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world_add((0.0, -1000.0, 0.0), 1000.0, ground_material);
 
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in [-10, 0, 10] {
+        for b in [-10, 0, 10] {
             let choose_mat = random_f64();
             let center = Vec3::new(
                 a as f64 + 0.9 * random_f64(),
