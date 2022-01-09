@@ -39,8 +39,15 @@ fn random_scene() -> HittableList {
     let ground_material = Arc::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
     world_add((0.0, -1000.0, 0.0), 1000.0, ground_material);
 
-    for a in -11..=11 {
-        for b in -11..=11 {
+    let range = if std::env::var("DEBUG").is_ok() {
+        eprintln!("fewer objects: -1..=1");
+        -1..=1
+    } else {
+        -11..=11
+    };
+
+    for a in range.clone() {
+        for b in range.clone() {
             let choose_mat = random_f64();
             let center = Vec3::new(
                 a as f64 + 0.9 * random_f64(),
